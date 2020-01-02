@@ -1,0 +1,102 @@
+{% include 'theme/theme.html' %}
+
+          <!-- Page Heading -->
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">操作盆栽_時間設定</h1>
+          </div>
+
+ <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.js"></script>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <script type="text/javascript">
+        var path_link = location.pathname ;
+        var path_link = path_link.replace("/watering/time/", "");
+        var get_sensor = path_link.replace("sensor=", "");
+
+        $(document).ready(function() {
+            var url_sensor = "http://192.168.54.139:1880/sensor";
+            var url_wateringtime = "http://192.168.54.139:1880/time?"+path_link;
+          //  var url_wateringtime = "http://192.168.54.139:1880/time?sensor=2";
+
+          $("#sensor").append(
+            "<a style='display:none;'>盆栽：<input type=\"text\" name=\"sensorID\" value=\""  + get_sensor + "\"></a>");
+
+            $.ajaxSetup({
+                async: false
+            });
+
+            $.getJSON(url_wateringtime, {}, function (data_timeINFO) { //讀取json資料,把資料放進data裡
+              var i = 0;
+              $.each(data_timeINFO, function() {       //用.each這個函式來取出Data裡的物件
+
+                var data_time = new Date(data_timeINFO[i].time* 1000).Format("yyyy-MM-dd hh:mm:ss");;
+
+
+                  $("#wateringtime_table").append(
+                    "<tr>" +
+                      "<td>" + data_time + "</td>" +
+                      "<td>" + data_timeINFO[i].flow + "</td>" +
+                      "<td> <a href =http://192.168.54.139:1880/api/time_del?id=" + data_timeINFO[i].ID + ">刪除</a></td>" +
+
+                    "</tr>");
+                  i++;
+              });
+            });
+
+            $.getJSON(url_sensor, {}, function (data_sensor) { //讀取json資料,把資料放進data裡
+              var i = 0;
+              $.each(data_sensor, function() {       //用.each這個函式來取出Data裡的物件
+                  $("#choose").append(
+                    "<option value=\"http://192.168.54.139:5000/watering/time/sensor="  + data_sensor[i].sensorID + "\">" + data_sensor[i].sensorID + "  " +  data_sensor[i].name + "</option>"
+
+            );
+                  i++;
+              });
+            });
+
+
+        });
+
+        Date.prototype.Format = function (fmt) { //時間格式處理
+            var o = {
+                "M+": this.getMonth() + 1, //月份
+                "d+": this.getDate(), //日
+                "h+": this.getHours(), //小时
+                "m+": this.getMinutes(), //分
+                "s+": this.getSeconds(), //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        }
+
+    </script>
+      <body><center>
+        <div style="font-family:標楷體;font-size:20px; ">選擇盆栽:
+         <select id="choose" style="width:200px;font-size: 15px;font-family:標楷體;"
+          onchange="location.href=this.options[this.selectedIndex].value" >
+          <option>-----請選擇-----</option>
+         </select>
+       </div><br>
+
+        <a>新增一筆操作</a><br>
+        <form action="http://192.168.54.139:1880/api/time_add" id="sensor">
+
+          <a>時間：<input type="datetime-local" name="time"></a>
+          <a>水量：<input type="text" name="flow"></a>
+          <input type="submit" value="Submit" />
+        </form><br><br>
+
+
+	<div>目前已設定的時間與流量</div>
+          <table  style="border:3px #000 ;text-align:center;" cellpadding="10" border='1' id="wateringtime_table">
+            <tr><td>設定時間</td><td>預計澆水量</td><td>操作</td>
+          </table>
+
+
+      </center></body>
+  </head>
+</html>
+{% include 'theme/footer.html' %}

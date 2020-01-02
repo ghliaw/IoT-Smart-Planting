@@ -1,0 +1,137 @@
+
+
+{% extends "bootstrap/base.html" %}
+{% block title %}IoT Smart Planting System{% endblock %}
+
+{% block styles %}
+{{ super() }}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+  $(document).ready(function() {
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    $('#publish').click(function(event) {
+      var topic = $('#topic').val();
+      var message = $('#message').val() ;   //mqtt msg
+      var sensorID =$('#choose_id').val(); 
+      var qos = $('#qos').val();
+      var data = '{"topic": "' + topic + '", "message": "' + sensorID + message + '", "qos": ' + qos + '}';
+      socket.emit('publish', data=data);
+    });
+    $('#subscribe').click(function(event) {
+      var topic = $('#subscribe_topic').val();
+      var qos = $('#subscribe_qos').val();
+      var data = '{"topic": "' + topic + '", "qos": ' + qos + '}';
+      socket.emit('subscribe', data=data);
+      $('#subscribe').hide();
+      $('#unsubscribe').show();
+      $('#subscribe_topic').prop('readonly', true);
+    });
+    $('#unsubscribe').click(function(event) {
+      socket.emit('unsubscribe_all');
+      $('#subscribe').show();
+      $('#unsubscribe').hide();
+      $('#subscribe_topic').prop('readonly', false);
+    });
+    socket.on('mqtt_message', function(data) {
+      console.log(data);
+      var text = '(' + data['topic'] + ' qos: ' + data['qos'] + ') ' + data['payload'];
+      var $textarea = $('#subscribe_messages');
+      $textarea.val($textarea.val() + text + '\n');
+    })
+  });
+</script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <script type="text/javascript">
+       var path_link = location.pathname ;
+       var path_link = path_link.replace("/watering/time/", "");
+       var get_sensor = path_link.replace("sensor=", "");
+
+       $(document).ready(function() {
+           var url_sensor = "http://192.168.0.139:1880/sensor";
+
+           $.ajaxSetup({
+               async: false
+           });
+
+
+           $.getJSON(url_sensor, {}, function (data_sensor) { //讀取json資料,把資料放進data裡
+             var i = 0;
+             $.each(data_sensor, function() {       //用.each這個函式來取出Data裡的物件
+                 $("#choose_id").append(
+                   "<option value=\""+ data_sensor[i].sensorID+"\">" + data_sensor[i].sensorID + "  " +  data_sensor[i].name + "</option>"
+           );
+                 i++;
+             });
+           });
+
+
+       });
+
+
+   </script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-xs-12">
+      <h1>IoT Smart Planting System</h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Publish MQTT Message</h3>
+        </div>
+        <div class="panel-body">
+          <div class="col-xs-12">
+            <div class="row">
+              <div class="form-horizontal">
+                <div class="form-group" style="display:none">
+                  <label class="control-label col-xs-4" style="display:none">Topic: </label>
+                  <div class="col-xs-8">
+                    <input id="topic" value="Planting_send" class="form-control">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label col-xs-4">Water Yield: </label>
+                  <div class="col-xs-8">
+                    <div style="font-family:標楷體;font-size:20px; ">選擇盆栽:
+                     <select id="choose_id" style="font-size: 15px;" >     <!--msg-->
+                      <option>-----請選擇-----</option>
+                     </select>
+                   </div><br>
+                    <input id="message" class="form-control">  <!--msg-->
+                  </div>
+                </div>
+                <div class="form-group" style="display:none">
+                  <label class="control-label col-xs-4">Qos: </label>
+                  <div class="col-xs-8">
+                    <select id="qos" class="form-control">
+                      <option value=0>0</option>
+                      <option value=1>1</option>
+                      <option value=2>2</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="col-xs-8 col-xs-offset-4">
+                    <button id="publish" class="btn btn-primary">Publish</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

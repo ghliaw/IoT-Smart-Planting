@@ -1,0 +1,78 @@
+{% include 'theme/theme.html' %}
+
+          <!-- Page Heading -->
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">操作盆栽_手動設定</h1>
+          </div>
+
+ <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.js"></script>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <script type="text/javascript">
+
+        var path_link = location.pathname ;
+        var path_link = path_link.replace("/watering/time/", "");
+
+        $(document).ready(function() {
+            var url_sensor = "http://192.168.54.139:1880/sensor";
+            var url_wateringmanual = "http://192.168.54.139:1880/manual";
+          //  var url_wateringtime = "http://192.168.54.139:1880/time?sensor=2";
+
+
+            $.ajaxSetup({
+                async: false
+            });
+
+            $.getJSON(url_wateringmanual, {}, function (data_INFO) { //讀取json資料,把資料放進data裡
+              var i = 0;
+              $.each(data_INFO, function() {       //用.each這個函式來取出Data裡的物件
+
+                  $("#wateringmanual_table").append(
+                    "<tr>" +
+                      "<td>" + data_INFO[i].sensorNo + "</td>" +
+                      "<td>" + data_INFO[i].flow + "</td>" +
+                      "<td> <a href =http://192.168.54.139:1880/api/manual_del?id=" + data_INFO[i].ID + ">刪除</a></td>" +
+
+                    "</tr>");
+                  i++;
+              });
+            });
+
+            $.getJSON(url_sensor, {}, function (data_sensor) { //讀取json資料,把資料放進data裡
+              var i = 0;
+              $.each(data_sensor, function() {       //用.each這個函式來取出Data裡的物件
+                  $("#choose").append(
+                    "<option value=\""  + data_sensor[i].sensorID + "\">" + data_sensor[i].sensorID + "  " +  data_sensor[i].name + "</option>"
+
+            );
+                  i++;
+              });
+            });
+
+
+        });
+
+    </script>
+      <body><center>
+
+        <a>新增一筆操作</a><br>
+        <form action="http://192.168.54.139:1880/api/manual_add">
+          選擇盆栽:
+           <select id="choose" style="font-size: 15px;"  name="sensorID">
+            <option>-----請選擇-----</option>
+           </select><br>
+          <a>水量：<input type="text" name="flow"></a><br>
+          <input type="submit" value="Submit" />
+        </form><br><br>
+
+
+	<div id="ref">目前尚未澆水清單
+          <table  style="border:3px #000 ;text-align:center;" cellpadding="10" border='1' id="wateringmanual_table">
+            <tr><td>盆栽編號</td><td>澆水量</td><td>操作</td>
+          </table>
+	</div>
+
+      </center></body>
+  </head>
+</html>
+{% include 'theme/footer.html' %}

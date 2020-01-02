@@ -1,0 +1,158 @@
+{% include 'theme/theme.html' %}
+
+
+ <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.js"></script>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <script type="text/javascript">
+        var path_link = location.pathname ;
+        var path_link = path_link.replace("/history/", "");
+        $(document).ready(function() {
+            var url_envirINFO = "http://192.168.54.139:1880/overview";
+            var url_lightINFO = "http://192.168.54.139:1880/light_status";
+
+
+            $.ajaxSetup({
+                async: false
+            });
+
+            $.getJSON(url_envirINFO, {}, function (data_envirINFO) { //讀取json資料,把資料放進data裡
+              var i = 0;
+              $.each(data_envirINFO, function() {       //用.each這個函式來取出Data裡的物件
+                data_envirINFO[i].soil_humi = data_envirINFO[i].soil_humi.replace(/01/, "潮濕");   //替換濕度代號
+                data_envirINFO[i].soil_humi = data_envirINFO[i].soil_humi.replace(/02/, "普通");
+                data_envirINFO[i].soil_humi = data_envirINFO[i].soil_humi.replace(/03/, "乾燥");
+
+
+                  $("#envirINFO").append(
+		    "<h5>#盆栽：" + data_envirINFO[i].sensorNo + "</h5>"+
+	         "<div class=\"row\">"+
+	          "<div class=\"col-xl-3 col-md-6 mb-4\">"+
+	            "<div class=\"card border-left-primary shadow h-100 py-2\">"+
+	              "<div class=\"card-body\">"+
+	                "<div class=\"row no-gutters align-items-center\">"+
+	                  "<div class=\"col mr-2\">"+
+	                    "<div class=\"text-xs font-weight-bold text-primary text-uppercase mb-1\">環境溫度</div>"+
+	                    "<div class=\"h5 mb-0 font-weight-bold text-gray-800\">" + data_envirINFO[i].temperature + " ℃</div>"+
+	                  "</div>"+
+	                  "<div class=\"col-auto\">"+
+	                    "<i class=\"fas fa-thermometer-three-quarters fa-2x text-gray-300\"></i>"+
+	                  "</div>"+
+	                "</div>"+
+	              "</div>"+
+	            "</div>"+
+          "</div>"+
+
+
+
+          "<div class=\"col-xl-3 col-md-6 mb-4\">"+
+            "<div class=\"card border-left-success shadow h-100 py-2\">"+
+              "<div class=\"card-body\">"+
+                "<div class=\"row no-gutters align-items-center\">"+
+                  "<div class=\"col mr-2\">"+
+                    "<div class=\"text-xs font-weight-bold text-success text-uppercase mb-1\">環境溼度</div>"+
+                    "<div class=\"h5 mb-0 font-weight-bold text-gray-800\">" + data_envirINFO[i].humidity + "%</div>"+
+                  "</div>"+
+                  "<div class=\"col-auto\">"+
+                    "<i class=\"fas fa-percentage fa-2x text-gray-300\"></i>"+
+                  "</div>"+
+                "</div>"+
+              "</div>"+
+            "</div>"+
+          "</div>"+
+
+
+          "<div class=\"col-xl-3 col-md-6 mb-4\">"+
+            "<div class=\"card border-left-info shadow h-100 py-2\">"+
+              "<div class=\"card-body\">"+
+                "<div class=\"row no-gutters align-items-center\">"+
+                  "<div class=\"col mr-2\">"+
+                    "<div class=\"text-xs font-weight-bold text-info text-uppercase mb-1\">土壤狀態</div>"+
+                    "<div class=\"row no-gutters align-items-center\">"+
+                      "<div class=\"col-auto\">"+
+                        "<div class=\"h5 mb-0 mr-3 font-weight-bold text-gray-800\">" + data_envirINFO[i].soil_humi + "</div>"+
+                      "</div>"+
+                    "</div>"+
+                  "</div>"+
+                  "<div class=\"col-auto\">"+
+                    "<i class=\"as fa-water fa-2x text-gray-300\"></i>"+
+                  "</div>"+
+                "</div>"+
+              "</div>"+
+            "</div>"+
+          "</div>"+
+
+
+
+          "<div class=\"col-xl-3 col-md-6 mb-4\">"+
+            "<div class=\"card border-left-warning shadow h-100 py-2\">"+
+              "<div class=\"card-body\">"+
+                "<div class=\"row no-gutters align-items-center\">"+
+                  "<div class=\"col mr-2\">"+
+                    "<div class=\"text-xs font-weight-bold text-warning text-uppercase mb-1\">資料取得時間</div>"+
+                    "<div class=\"h5 mb-0 font-weight-bold text-gray-800\">" + data_envirINFO[i].time + "</div>"+
+                  "</div>"+
+                  "<div class=\"col-auto\">"+
+                     "<i class=\"as fa-water fa-2x text-gray-300\"></i>"+
+                  "</div>"+
+                "</div>"+
+              "</div>"+
+            "</div>"+
+          "</div><br>"
+
+
+
+);
+                  i++;
+              });
+            });
+
+
+            $.getJSON(url_lightINFO, {}, function (data_lightINFO) { //讀取json資料,把資料放進data裡
+              var i = 0;
+              $.each(data_lightINFO, function() {       //用.each這個函式來取出Data裡的物件
+
+                data_lightINFO[i].status = data_lightINFO[i].status.replace(/01/, "開燈");
+                data_lightINFO[i].status = data_lightINFO[i].status.replace(/00/, "關燈");
+
+                  $("#light_status").append(
+                      "<a>" + data_lightINFO[i].status + "</a>"
+                     );
+                  i++;
+              });
+            });
+
+
+        });
+
+
+    </script>
+      <body>
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">總 覽</h1>
+          </div>
+
+          <!-- Approach -->
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">溫室操作</h6>
+            </div>
+            <div class="card-body">
+              <div class="container">
+                <a>目前狀態：<a id="light_status"></a></a>                  <a style="margin-left:70px;"></a>
+                <a>操作： <a style="margin-left:20px;"></a>
+                  <a href="http://192.168.54.139:1880/api/light_on" class="btn btn-outline-success btn-lg">開燈</a>
+                  <a style="margin-left:20px;"></a>
+                  <a href="http://192.168.54.139:1880/api/light_off" class="btn btn-outline-danger btn-lg">關燈</a>
+                </a>
+              </div>
+            </div>
+          </div>
+	<div id="envirINFO">
+       </div><br>
+
+
+          <br><br>
+
+     </body>
+
+{% include 'theme/footer.html' %}
